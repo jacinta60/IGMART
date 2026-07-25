@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* Main content margin for sidebar */
+.main-content {
+  margin-left: 16rem;
+  transition: margin-left 0.3s ease;
+}
+
+.main-content.collapsed {
+  margin-left: 5rem;
+}
+
+/* Print Styles - Receipt prints correctly */
+@media print {
+  @page {
+    margin: 0.5in;
+    size: auto;
+  }
+  
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color: black !important;
+    background: white !important;
+  }
+  
+  body {
+    background: white !important;
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* Hide EVERYTHING except receipt */
+  body > *:not(.receipt-wrapper) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Show receipt wrapper */
+  .receipt-wrapper {
+    display: block !important;
+    visibility: visible !important;
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: white !important;
+    color: black !important;
+    z-index: 9999 !important;
+    padding: 20px !important;
+  }
+  
+  .receipt-wrapper * {
+    visibility: visible !important;
+    color: black !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+}
