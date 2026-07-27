@@ -52,8 +52,11 @@ npm run db:migrate   # apply tracked migrations (recommended)
 # or
 npm run db:push      # push schema directly without migration history
 
-# 4. (Optional) Load sample data via the Dashboard "Load Sample Data" button,
-#    or hit POST /api/seed.
+# 4. (Recommended) Seed demo data so you can log in:
+npm run db:seed
+#    Creates admin/admin and staff/staff plus sample products/categories/units.
+#    (You can also re-seed later from the dashboard's "Load Sample Data" button,
+#    but that requires being logged in first — so use this on a fresh database.)
 
 # 5. Run the dev server
 npm run dev
