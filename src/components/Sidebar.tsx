@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   LayoutDashboard,
   Package,
@@ -18,19 +18,22 @@ import {
   Wallet,
 } from "lucide-react";
 
+function readAuthUser(): { name: string; role: string } | null {
+  if (typeof document === "undefined") return null;
+  const cookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("auth_token="));
+  if (!cookie) return null;
+  try {
+    return JSON.parse(decodeURIComponent(cookie.split("=")[1]));
+  } catch {
+    return null;
+  }
+}
+
 export function Sidebar() {
   const pathname = usePathname();
-  const [user, setUser] = useState<{ name: string; role: string } | null>(null);
-
-  useEffect(() => {
-    const cookie = document.cookie.split("; ").find((row) => row.startsWith("auth_token="));
-    if (cookie) {
-      try {
-        const userData = JSON.parse(decodeURIComponent(cookie.split("=")[1]));
-        setUser(userData);
-      } catch (e) {}
-    }
-  }, []);
+  const [user] = useState<{ name: string; role: string } | null>(readAuthUser);
 
   const handleLogout = async () => {
     await fetch("/api/auth", { method: "DELETE" });

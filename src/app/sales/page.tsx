@@ -40,25 +40,25 @@ interface CurrentUser {
   role: string;
 }
 
+function readCurrentUser(): CurrentUser | null {
+  if (typeof document === "undefined") return null;
+  const cookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("auth_token="));
+  if (!cookie) return null;
+  try {
+    return JSON.parse(decodeURIComponent(cookie.split("=")[1]));
+  } catch {
+    return null;
+  }
+}
+
 export default function SalesPage() {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedSale, setSelectedSale] = useState<SaleDetail | null>(null);
   const [showDetail, setShowDetail] = useState(false);
-  const [user, setUser] = useState<CurrentUser | null>(null);
-
-  useEffect(() => {
-    // Get current user from auth cookie
-    const cookie = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("auth_token="));
-    if (cookie) {
-      try {
-        const userData = JSON.parse(decodeURIComponent(cookie.split("=")[1]));
-        setUser(userData);
-      } catch (e) {}
-    }
-  }, []);
+  const [user] = useState<CurrentUser | null>(readCurrentUser);
 
   const loadSales = async () => {
     try {
@@ -75,10 +75,9 @@ export default function SalesPage() {
   };
 
   useEffect(() => {
-    if (user) {
-      loadSales();
-    }
-  }, [user]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount; state is set inside the async callback
+    loadSales();
+  }, []);
 
   const viewSale = async (id: number) => {
     const res = await fetch(`/api/sales/${id}`);

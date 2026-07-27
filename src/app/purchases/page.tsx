@@ -46,6 +46,7 @@ export default function PurchasesPage() {
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount; state is set inside the async callback
   useEffect(() => { loadData(); }, []);
 
   const addToCart = (product: Product) => {

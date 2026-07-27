@@ -30,6 +30,7 @@ export default function EmployeesPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount; state is set inside the async callback
     loadEmployees();
   }, []);
 

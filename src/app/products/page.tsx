@@ -77,6 +77,7 @@ export default function ProductsPage() {
     finally { setLoading(false); }
   }, [search, filterCategory]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount; state is set inside the async callback
   useEffect(() => { loadData(); }, [loadData]);
 
   const openAdd = () => {

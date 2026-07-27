@@ -37,6 +37,7 @@ export default function ReportsPage() {
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount; state is set inside the async callback
   useEffect(() => { loadReports(); }, []);
 
   const handleGenerate = () => { loadReports(); };

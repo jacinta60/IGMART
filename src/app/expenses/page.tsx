@@ -27,6 +27,7 @@ export default function ExpensesPage() {
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount; state is set inside the async callback
   useEffect(() => { loadExpenses(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

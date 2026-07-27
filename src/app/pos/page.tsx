@@ -46,6 +46,19 @@ interface CartItem {
   editMode?: boolean;
 }
 
+function readUserId(): number | null {
+  if (typeof document === "undefined") return null;
+  const cookie = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("auth_token="));
+  if (!cookie) return null;
+  try {
+    return JSON.parse(decodeURIComponent(cookie.split("=")[1])).id;
+  } catch {
+    return null;
+  }
+}
+
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -58,21 +71,12 @@ export default function POSPage() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastSale, setLastSale] = useState<any>(null);
   const [processing, setProcessing] = useState(false);
-  const [userId, setUserId] = useState<number | null>(null);
+  const [userId] = useState<number | null>(readUserId);
   const [editingQty, setEditingQty] = useState<{[key: number]: string}>({});
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [categories, setCategories] = useState<Array<{id: number; name: string}>>([]);
 
   useEffect(() => {
-    const cookie = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("auth_token="));
-    if (cookie) {
-      try {
-        const userData = JSON.parse(decodeURIComponent(cookie.split("=")[1]));
-        setUserId(userData.id);
-      } catch (e) {}
-    }
     // Load categories
     fetch("/api/categories").then(r => r.json()).then(setCategories);
   }, []);
@@ -98,6 +102,7 @@ export default function POSPage() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount; state is set inside the async callback
     loadProducts();
     loadCustomers();
   }, [loadProducts]);
