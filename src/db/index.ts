@@ -12,20 +12,32 @@ const databaseUrl = process.env.DATABASE_URL;
 // variable is missing (pg only fails later, on connect), which keeps
 // `next build` working and surfaces a clear connection error at runtime.
 //
-// TLS: Supabase (and most managed Postgres) present a certificate that strict
-// verification (pg's "require" -> "verify-full" in pg v9) rejects in some
-// runtimes such as Vercel, causing "self-signed certificate in certificate
-// chain". For any non-local connection we keep encryption but skip CA-chain
-// verification. Local dev connections don't use TLS.
+// TLS on managed Postgres (Supabase, etc.): pg v9 treats sslmode=require as
+// verify-full, which rejects Supabase's certificate chain in runtimes like
+// Vercel ("self-signed certificate in certificate chain"). For non-local
+// connections we request libpq-compatible TLS via `uselibpqcompat` (encrypt
+// without CA verification) and also set ssl.rejectUnauthorized = false as a
+// belt-and-suspenders measure. Local dev connections stay non-TLS.
 const isLocal =
   !databaseUrl ||
   databaseUrl.includes("localhost") ||
   databaseUrl.includes("127.0.0.1");
 
+function buildConnectionString(url: string): string {
+  if (isLocal) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set("uselibpqcompat", "true");
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 const pool =
   globalForDb.__arenaNextJsPostgresqlPool ??
   new Pool({
-    connectionString: databaseUrl,
+    connectionString: databaseUrl ? buildConnectionString(databaseUrl) : databaseUrl,
     ...(isLocal ? {} : { ssl: { rejectUnauthorized: false } }),
   });
 
