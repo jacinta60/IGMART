@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useAuthUser } from "@/lib/useAuthUser";
 import {
   ShoppingCart,
   Search,
@@ -46,19 +47,6 @@ interface CartItem {
   editMode?: boolean;
 }
 
-function readUserId(): number | null {
-  if (typeof document === "undefined") return null;
-  const cookie = document.cookie
-    .split("; ")
-    .find((row) => row.startsWith("auth_token="));
-  if (!cookie) return null;
-  try {
-    return JSON.parse(decodeURIComponent(cookie.split("=")[1])).id;
-  } catch {
-    return null;
-  }
-}
-
 export default function POSPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -71,7 +59,8 @@ export default function POSPage() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [lastSale, setLastSale] = useState<any>(null);
   const [processing, setProcessing] = useState(false);
-  const [userId] = useState<number | null>(readUserId);
+  const user = useAuthUser();
+  const userId = user?.id ?? null;
   const [editingQty, setEditingQty] = useState<{[key: number]: string}>({});
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [categories, setCategories] = useState<Array<{id: number; name: string}>>([]);
