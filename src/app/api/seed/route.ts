@@ -2,16 +2,21 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { categories, products, sales, saleItems, units, users } from "@/db/schema";
 import { sql } from "drizzle-orm";
+import { hashPassword } from "@/lib/password";
 
 export async function POST() {
   try {
     // Clear data for fresh start (optional but good for this request)
     await db.execute(sql`TRUNCATE TABLE sale_items, sales, products, categories, units, users CASCADE`);
 
-    // Seed Users
+    // Seed Users (passwords are hashed at rest; log in with admin/admin, staff/staff)
+    const [adminHash, staffHash] = await Promise.all([
+      hashPassword("admin"),
+      hashPassword("staff"),
+    ]);
     await db.insert(users).values([
-      { username: "admin", password: "admin", fullName: "Admin Manager", role: "admin" },
-      { username: "staff", password: "staff", fullName: "Sales Staff", role: "employee" },
+      { username: "admin", password: adminHash, fullName: "Admin Manager", role: "admin" },
+      { username: "staff", password: staffHash, fullName: "Sales Staff", role: "employee" },
     ]);
 
     // Seed Units

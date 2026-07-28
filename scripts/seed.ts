@@ -2,6 +2,7 @@ import "dotenv/config";
 import { db } from "../src/db";
 import { categories, products, units, users } from "../src/db/schema";
 import { sql } from "drizzle-orm";
+import { hashPassword } from "../src/lib/password";
 
 /**
  * Bootstraps a fresh database with demo data so you can log in immediately.
@@ -18,9 +19,14 @@ async function main() {
     sql`TRUNCATE TABLE sale_items, sales, products, categories, units, users CASCADE`
   );
 
+  // Passwords are stored as bcrypt hashes. Log in with admin/admin, staff/staff.
+  const [adminHash, staffHash] = await Promise.all([
+    hashPassword("admin"),
+    hashPassword("staff"),
+  ]);
   await db.insert(users).values([
-    { username: "admin", password: "admin", fullName: "Admin Manager", role: "admin" },
-    { username: "staff", password: "staff", fullName: "Sales Staff", role: "employee" },
+    { username: "admin", password: adminHash, fullName: "Admin Manager", role: "admin" },
+    { username: "staff", password: staffHash, fullName: "Sales Staff", role: "employee" },
   ]);
 
   const [pcs] = await db.insert(units).values({ name: "Pieces", shortName: "pcs" }).returning();
